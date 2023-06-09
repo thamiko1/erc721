@@ -11,10 +11,13 @@
     />
   </head>
   <body>
+    <!-- <input type="text" id="tokenIdInput" placeholder="Enter Token ID" />
+    <button onclick="getOwner()">Get Owner</button> -->
     <div class="container mt-4">
       <div class="row">
         <div class="col">
           <h3>Number of NFTs: <span id="numNfts"></span></h3>
+          <h3>NFT id owned: <span id="nftIdOwned"></span></h3>
           <button class="btn btn-primary" onclick="getAllNFTs()">
             Update NFTs
           </button>
@@ -43,13 +46,13 @@
           <button class="btn btn-primary" onclick="mintNFT()">Mint</button>
         </div>
         <div class="row">
-          <div class="item">
+          <div class="mb-3">
             <h3>Transfer NFT</h3>
             <label for="transferTokenId">Token ID:</label>
             <input type="text" id="transferTokenId" />
             <label for="transferToAddress">To Address:</label>
             <input type="text" id="transferToAddress" />
-            <button onclick="transferNFT()">Transfer</button>
+            <button class="btn btn-primary" onclick="transferNFT()">Transfer</button>
           </div>
         </div>
       </div>

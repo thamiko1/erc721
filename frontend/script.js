@@ -9,21 +9,22 @@ const tokenAbi = [
   "function approve(address to, uint256 tokenId)",
   "function balanceOf(address owner) view returns (uint256)",
   "function getApproved(uint256 tokenId) view returns (address)",
+  "function getTokenIdsOfOwner(address owner) view returns (uint256[])",
   "function isApprovedForAll(address owner, address operator) view returns (bool)",
   "function mintToken(address owner, string metadataURI) returns (uint256)",
   "function name() view returns (string)",
   "function ownerOf(uint256 tokenId) view returns (address)",
   "function safeTransferFrom(address from, address to, uint256 tokenId)",
-  "function safeTransferFrom(address from, address to, uint256 tokenId, bytes data)",
+  "function safeTransferFrom(address from, address to, uint256 tokenId, bytes _data)",
   "function setApprovalForAll(address operator, bool approved)",
+  "function setTokenURI(uint256 tokenId, string metadataURI)",
   "function supportsInterface(bytes4 interfaceId) view returns (bool)",
   "function symbol() view returns (string)",
-  "function tokenByIndex(uint256 index) view returns (uint256)",
   "function tokenURI(uint256 tokenId) view returns (string)",
   "function transferFrom(address from, address to, uint256 tokenId)",
 ];
 
-const tokenAddress = "0xCf7Ed3AccA5a467e9e704C703E8D87F634fB0Fc9";
+const tokenAddress = "0xe7f1725E7734CE288F8367e1Bb143E90bb3F0512";
 let tokenContract = null;
 
 async function getAccess() {
@@ -36,72 +37,71 @@ async function getAccess() {
 async function getAllNFTs() {
   await getAccess();
   const ownerAddress = await signer.getAddress();
+  console.log(ownerAddress);
 
   const numNFTs = await tokenContract.balanceOf(ownerAddress);
+  const tokenIds = await tokenContract.getTokenIdsOfOwner(ownerAddress);
   document.getElementById("numNfts").textContent = numNFTs;
-
-  const nfts = [];
-  const promises = [];
-  for (let idx = 0; idx < numNFTs; idx++) {
-    const tokenId = await tokenContract.tokenByIndex(idx);
-    const uri = await tokenContract.tokenURI(tokenId);
-    nfts.push({ id: tokenId, uri: uri });
-  }
-
+  document.getElementById("nftIdOwned").textContent = tokenIds;
   const nftsContainer = document.getElementById("nfts");
-  nftsContainer.innerHTML = ""; // Clear previous NFTs
+  nftsContainer.innerHTML = "";
 
   const row = document.createElement("div");
   row.classList.add("row");
 
-  for (const nft of nfts) {
-    const link = getUrl(nft.uri);
-    const promise = fetch(link)
-      .then((response) => response.json())
-      .then((json) => {
-        const col = document.createElement("div");
-        col.classList.add("col");
+  for (let i = 0; i < tokenIds.length; i++) {
+    const tokenId = tokenIds[i];
+    console.log("tokenid: ", tokenId.toNumber());
+    const uri = await tokenContract.tokenURI(tokenId);
+    const owner = await tokenContract.ownerOf(tokenId);
 
-        const card = document.createElement("div");
-        card.classList.add("card");
+    const link = getUrl(uri);
+    const response = await fetch(link);
+    const json = await response.json();
 
-        const img = document.createElement("img");
-        img.src = getUrl(json.image);
-        img.classList.add("card-img-top", "img-fluid");
-        img.style.maxHeight = "200px"; // Set max height for the image
-        img.style.objectFit = "cover"; // Ensure the image fills the container
-        card.appendChild(img);
+    const col = document.createElement("div");
+    col.classList.add("col");
 
-        const cardBody = document.createElement("div");
-        cardBody.classList.add("card-body");
+    const card = document.createElement("div");
+    card.classList.add("card");
 
-        const tokenId = document.createElement("p");
-        tokenId.classList.add("card-text");
-        tokenId.textContent = "Token ID: " + nft.id;
-        cardBody.appendChild(tokenId);
+    const img = document.createElement("img");
+    img.src = getUrl(json.image);
+    img.classList.add("card-img-top", "img-fluid");
+    img.style.maxHeight = "200px";
+    img.style.objectFit = "cover";
+    card.appendChild(img);
 
-        const name = document.createElement("h5");
-        name.classList.add("card-title");
-        name.textContent = json.name;
-        cardBody.appendChild(name);
+    const cardBody = document.createElement("div");
+    cardBody.classList.add("card-body");
 
-        const description = document.createElement("p");
-        description.classList.add("card-text");
-        description.textContent = json.description;
-        cardBody.appendChild(description);
+    const tokenIdElement = document.createElement("p");
+    tokenIdElement.classList.add("card-text");
+    tokenIdElement.textContent = "Token ID: " + tokenId;
+    cardBody.appendChild(tokenIdElement);
 
-        card.appendChild(cardBody);
-        col.appendChild(card);
-        row.appendChild(col);
-      });
+    const name = document.createElement("h5");
+    name.classList.add("card-title");
+    name.textContent = json.name;
+    cardBody.appendChild(name);
 
-    promises.push(promise);
+    const description = document.createElement("p");
+    description.classList.add("card-text");
+    description.textContent = json.description;
+    cardBody.appendChild(description);
+
+    const ownerElement = document.createElement("p");
+    ownerElement.classList.add("card-text");
+    ownerElement.textContent = "Owner: " + owner;
+    cardBody.appendChild(ownerElement);
+
+    card.appendChild(cardBody);
+    col.appendChild(card);
+    row.appendChild(col);
+
+    nftsContainer.appendChild(row);
   }
-
-  await Promise.all(promises);
-  nftsContainer.appendChild(row);
 }
-
 
 async function mintNFT() {
   await getAccess();
@@ -175,12 +175,30 @@ async function transferNFT() {
 
   try {
     await getAccess();
+
+    // Transfer the NFT to the target address
     await tokenContract.transferFrom(signer.getAddress(), toAddress, tokenId);
     console.log("NFT transferred successfully");
+
+    getAllNFTs(); // Update the displayed NFTs after the transfer
   } catch (error) {
     console.error("Error transferring NFT:", error);
   }
 }
+
 function getUrl(ipfs) {
   return "https://ipfs.io/ipfs/" + ipfs;
 }
+
+// async function getOwner() {
+//   const tokenId = document.getElementById("tokenIdInput").value;
+
+//   try {
+//     await getAccess();
+//     const owner = await tokenContract.ownerOf(tokenId);
+
+//     console.log("Owner of Token ID", tokenId, ":", owner);
+//   } catch (error) {
+//     console.error("Error getting owner:", error);
+//   }
+// }
