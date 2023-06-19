@@ -103,7 +103,7 @@ async function getAllNFTs() {
   }
 }
 
-async function mintNFT() {
+async function MintNFT() {
   await getAccess();
 
   const nftName = document.getElementById("nftName").value;
