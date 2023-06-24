@@ -1,0 +1,20 @@
+{
+  "network": "localhost",
+  "contract": {
+    "address": "0xfbC22278A96299D91d41C453234d97b4F5Eb9B2d",
+    "signerAdderss": "0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266",
+    "abi": [
+      "event Bid(address bidder, uint256 listingId, uint256 amount, uint256 timestamp)",
+      "event List(address lister, address nft, uint256 nftId, uint256 listingId, uint256 minimumPrice, uint256 endTime, uint256 timestamp)",
+      "function bid(uint256 listingId) payable",
+      "function end(uint256 listingId)",
+      "function getAuctionCount() view returns (uint256)",
+      "function getHighestBidder(uint256 listingId) view returns (address)",
+      "function getListing(uint256 listingId) view returns (address, uint256, uint256, uint256, uint256)",
+      "function getListingOwner(uint256 listingId) view returns (address)",
+      "function list(address nft, uint256 nftId, uint256 minPrice, uint256 numHours)",
+      "function onERC721Received(address operator, address from, uint256 tokenId, bytes data) returns (bytes4)",
+      "function withdrawFunds()"
+    ]
+  }
+}
