@@ -13,7 +13,11 @@ const NavbarTop = ({ connect, connected, signerAddress }) => {
           <Nav className="me-auto">
             <Nav.Link href="/myNFT">My NFT</Nav.Link>
             <Nav.Link href="/mintNFT">Mint NFT</Nav.Link>
+            <Nav.Link href="/bidNFT">Bid NFT</Nav.Link>
           </Nav>
+          {/* <Nav>
+            <Button onClick={}>Withdraw Funds</Button>
+          </Nav> */}
           <Nav>
             {!connected ? (
               <Button onClick={connect}>Connect to Metamask</Button>
