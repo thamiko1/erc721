@@ -24,12 +24,7 @@ const Bid = ({ contract, auction }) => {
       let i = 0;
 
       while (fetchedCount < auctionCount) {
-        try {
-          const exists = await auction.listingExists(i);
-          if (!exists) {
-            i++;
-            continue;
-          }
+        try {          
           const auctionData = await auction.getListing(i);
           console.log(auctionData.toString());
           const tokenId = auctionData[1].toString();
